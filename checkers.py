@@ -22,6 +22,7 @@ class Node:
         self.parent = parent
 
     def get_children(self, minimizing_player, mandatory_jumping):
+        '''obtine los hijos y  retorna rna una lista con los estados de los mismos'''
         current_state = deepcopy(self.board)
         available_moves = []
         children_states = []
