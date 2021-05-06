@@ -2,6 +2,7 @@ from copy import deepcopy
 import time
 import math
 
+'''asigna un color  a estas varibles '''
 ansi_black = "\u001b[30m"
 ansi_red = "\u001b[31m"
 ansi_green = "\u001b[32m"
