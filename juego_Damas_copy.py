@@ -22,7 +22,7 @@ class Node:
         self.padre = padre # padre
 
     def generar_hijos(self, minimizando_jugador, salto_obligatorio):
-        '''obtine los hijos y  retorna rna una lista con los estados de los mismos'''
+        '''obtine los hijos y retorna  una lista con el estado y sus posibles moviminentoslos '''
         estado_actual = deepcopy(self.tablero)
         movimientos_disponibles = []
         hijos_estado = []
@@ -270,7 +270,7 @@ class juego_damas:
             return True
 
     @staticmethod
-    def calcular_heurísticas(tablero):
+    def calcular_heuristicas(tablero):
         ''' Evalua todas las situciones favorables para el computador ,  la catidas de piezas y retorna '''
         resultado = 0
         contador_c_piezas = 0
@@ -401,63 +401,67 @@ class juego_damas:
         return True
 
     def evaluar_estados(self):
+        '''evalua el estado del nodo actual y elegir el mejor proximo moviminneto 
+        y agregarlo a la matriz de esta clase caculando el tiempo de ejecuciiion he imprimir a donde 
+        se esta moviendo'''
         t1 = time.time()
         estado_actual = Node(deepcopy(self.matriz))
 
-        first_computer_moves = estado_actual.generar_hijos(True, self.salto_obligatorio)
-        if len(first_computer_moves) == 0:
+        primeros_movimmientos_de_la_computadora = estado_actual.generar_hijos(True, self.salto_obligatorio)
+        if len(primeros_movimmientos_de_la_computadora) == 0:
             if self.piezas_jugador > self.piezas_computadora:
                 print(
-                    ansi_yellow + "Computer has no available moves left, and you have more pieces left.\nYOU WIN!" + ansi_reset)
+                    ansi_yellow + "A la computadora no le quedan movimientos disponibles y te quedan más piezas.\ntu ganas por ahora !" + ansi_reset)
                 exit()
             else:
-                print(ansi_yellow + "Computer has no available moves left.\nGAME ENDED!" + ansi_reset)
+                print(ansi_yellow + "A la computadora no le quedan movimientos disponibles.\njuego terminado !" + ansi_reset)
                 exit()
         dict = {}
-        for i in range(len(first_computer_moves)):
-            child = first_computer_moves[i]
-            valor = juego_damas.minimax(child.get_tablero(), 4, -math.inf, math.inf, False, self.salto_obligatorio)
-            dict[valor] = child
+        for i in range(len(primeros_movimmientos_de_la_computadora)):
+            hijo = primeros_movimmientos_de_la_computadora[i]
+            valor = juego_damas.minimax(hijo.get_tablero(), 4, -math.inf, math.inf, False, self.salto_obligatorio)
+            dict[valor] = hijo
         if len(dict.keys()) == 0:
-            print(ansi_green + "Computer has cornered itself.\nYOU WIN!" + ansi_reset)
+            print(ansi_green + "La computadora se ha arrinconado..\ntu ganas!" + ansi_reset)
             exit()
-        coordenada_nueva_tablero = dict[max(dict)].get_tablero()
-        move = dict[max(dict)].move
+        coordenada_nueva_tablero = dict[max(dict)].get_tablero() # escoge el maxima calve que esta en el dicionario
+        move = dict[max(dict)].move 
         self.matriz = coordenada_nueva_tablero
         t2 = time.time()
         diff = t2 - t1
-        print("Computer has moved (" + str(move[0]) + "," + str(move[1]) + ") to (" + str(move[2]) + "," + str(
-            move[3]) + ").")
-        print("It took him " + str(diff) + " seconds.")
+        print("La computadora se ha movido de (" + str(move[0]) + "," + str(move[1]) + ") a (" + str(move[2]) + "," + str(move[3]) + ").")
+        print("en " + str(diff) + " segundos.")
 
     @staticmethod
-    def minimax(tablero, depth, alpha, beta, maximizing_player, salto_obligatorio):
-        if depth == 0:
-            return juego_damas.calcular_heurísticas(tablero)
+    def minimax(tablero, profundidad, alpha, beta, maximizando_jugador, salto_obligatorio):
+        if profundidad == 0:
+            return juego_damas.calcular_heuristicas(tablero) #devuelve solo el valor de la heuristica
         estado_actual = Node(deepcopy(tablero))
-        if maximizing_player is True:
-            max_eval = -math.inf
-            for child in estado_actual.generar_hijos(True, salto_obligatorio):
-                ev = juego_damas.minimax(child.get_tablero(), depth - 1, alpha, beta, False, salto_obligatorio)
-                max_eval = max(max_eval, ev)
+        if maximizando_jugador is True:
+            max_eval = -math.inf # la peor obcino para maximizar
+            for hijo in estado_actual.generar_hijos(True, salto_obligatorio):
+                ev = juego_damas.minimax(hijo.get_tablero(), profundidad - 1, alpha, beta, False, salto_obligatorio)
+                max_eval = max(max_eval, ev) #tiene el maximo valor de la hoja en la que esta 
                 alpha = max(alpha, ev)
-                if beta <= alpha:
+                if beta <= alpha: # podalos las ramas inutiles
                     break
-            estado_actual.set_valor(max_eval)
-            return max_eval
+            estado_actual.set_valor(max_eval) # amacena el valor del maximo y lo devuelve
+            return max_eval 
         else:
-            min_eval = math.inf
-            for child in estado_actual.generar_hijos(False, salto_obligatorio):
-                ev = juego_damas.minimax(child.get_tablero(), depth - 1, alpha, beta, True, salto_obligatorio)
-                min_eval = min(min_eval, ev)
-                beta = min(beta, ev)
+            min_eval = math.inf # toma la peor opcion posible para minimizar 
+            for hijo in estado_actual.generar_hijos(False, salto_obligatorio):
+                ev = juego_damas.minimax(hijo.get_tablero(), profundidad - 1, alpha, beta, True, salto_obligatorio)
+                min_eval = min(min_eval, ev) #tiene el valor minimo de la hoja en la que esta
+                beta = min(beta, ev) 
                 if beta <= alpha:
                     break
-            estado_actual.set_valor(min_eval)
+            estado_actual.set_valor(min_eval)# amacena el valor del minimo y lo devuelve
             return min_eval
 
     @staticmethod
     def hacer_un_movimiento(tablero, viejo_i, viejo_j, nuevo_i, nuevo_j, letra_grande, fila_reina):
+        '''hace el movimiento intercambiando la la celda con un elemto por una vacia 
+         y la del destino por el elemto incluida la accion de comerse una pieza'''
         letter = tablero[viejo_i][viejo_j][0]
         i_difference = viejo_i - nuevo_i
         j_difference = viejo_j - nuevo_j
@@ -479,53 +483,53 @@ class juego_damas:
         tablero[nuevo_i][nuevo_j] = letter + str(nuevo_i) + str(nuevo_j)
 
     def play(self):
-        print(ansi_cyan + "##### WELCOME TO juego_damas ####" + ansi_reset)
-        print("\nSome basic rules:")
-        print("1.You enter the coordinates in the form i,j.")
-        print("2.You can quit the game at any time by pressing enter.")
-        print("3.You can surrender at any time by pressing 's'.")
-        print("Now that you've familiarized yourself with the rules, enjoy!")
+        print(ansi_cyan + "##### BIENVENIDO A juego_damas ####" + ansi_reset)
+        print("\nAlgunas reglas básicas:")
+        print("1. Introduzca las coordenadas en la forma i, j.")
+        print("2.Puedes salir del juego en cualquier momento presionando Enter.")
+        print("3.Puede rendirse en cualquier momento presionando 's'.")
+        print("Ahora que se ha familiarizado con las reglas, ¡disfrútelo!")
         while True:
-            answer = input("\nFirst, we need to know, is jumping mandatory?[Y/n]: ")
-            if answer == "Y" or answer == "y":
+            Respuesta_del_jugador = input("\nPrimero, necesitamos saber, ¿es obligatorio saltar?[Y/n]: ")
+            if Respuesta_del_jugador == "Y" or Respuesta_del_jugador == "y":
                 self.salto_obligatorio = True
                 break
-            elif answer == "N" or answer == "n":
+            elif Respuesta_del_jugador == "N" or Respuesta_del_jugador == "n":
                 self.salto_obligatorio = False
                 break
-            elif answer == "":
-                print(ansi_cyan + "Game ended!" + ansi_reset)
+            elif Respuesta_del_jugador == "":
+                print(ansi_cyan + "el juegotermino!" + ansi_reset)
                 exit()
-            elif answer == "s":
-                print(ansi_cyan + "You've surrendered before the game even started.\nPathetic." + ansi_reset)
+            elif Respuesta_del_jugador == "s":
+                print(ansi_cyan + "Te has rendido incluso antes de que comenzara el juego.\n JAJAJA Pathetic." + ansi_reset)
                 exit()
             else:
-                print(ansi_red + "Illegal input!" + ansi_reset)
+                print(ansi_red + "Entrada ilegal!" + ansi_reset)
         while True:
             self.imprimir_matriz()
             if self.turno_jugador is True:
-                print(ansi_cyan + "\nPlayer's turn." + ansi_reset)
+                print(ansi_cyan + "\nTURNO DEL JUGADOR" + ansi_reset)
                 self.obtener_entrada_jugador()
             else:
-                print(ansi_cyan + "Computer's turn." + ansi_reset)
-                print("Thinking...")
+                print(ansi_cyan + "TURNO DE LA COMPUTADORA" + ansi_reset)
+                print("Pensando...")
                 self.evaluate_estados()
             if self.piezas_jugador == 0:
                 self.imprimir_matriz()
-                print(ansi_red + "You have no pieces left.\nYOU LOSE!" + ansi_reset)
+                print(ansi_red + "No te quedan piezas.\nTU PIERDES! Yo gano como debe de ser" + ansi_reset)
                 exit()
             elif self.piezas_computadora == 0:
                 self.imprimir_matriz()
                 print(ansi_green + "Computer has no pieces left.\nYOU WIN!" + ansi_reset)
                 exit()
             elif self.piezas_computadora - self.piezas_jugador == 7:
-                wish = input("You have 7 pieces fewer than your contador_b_piezasonent.Do you want to surrender?")
+                wish = input("Tienes 7 piezas menos que tu contador_b_piezasonent ¿Quieres rendirte?")
                 if wish == "" or wish == "yes":
                     print(ansi_cyan + "Coward." + ansi_reset)
                     exit()
             self.turno_jugador = not self.turno_jugador
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':# esto es para que no se ejecute atomaticamante en otro modulo, sin hacer alguna llamada 
     juego_damas = juego_damas()
     juego_damas.play()
