@@ -33,7 +33,7 @@ class Node:
             letra_grande = "C"
             fila_reina = 7
         else:
-            movimientos_disponibles = juego_damas.find_player_movimientos_disponibles(estado_actual, salto_obligatorio)
+            movimientos_disponibles = juego_damas.encontrar_movimientos_del_jugador_disponibles(estado_actual, salto_obligatorio)
             letra_grande = "B"
             fila_reina = 0
         for i in range(len(movimientos_disponibles)):
@@ -42,7 +42,7 @@ class Node:
             nuevo_i = movimientos_disponibles[i][2]
             nuevo_j = movimientos_disponibles[i][3]
             estado = deepcopy(estado_actual)
-            juego_damas.make_a_move(estado, viejo_i, viejo_j, nuevo_i, nuevo_j, letra_grande, fila_reina)
+            juego_damas.hacer_un_movimiento(estado, viejo_i, viejo_j, nuevo_i, nuevo_j, letra_grande, fila_reina)
             hijos_estado.append(Node(estado, [viejo_i, viejo_j, nuevo_i, nuevo_j]))
         return hijos_estado
 
@@ -79,82 +79,107 @@ class juego_damas:
         self.posicion_computadora()
         self.posicion_jugador()
 
-    def posicion_computadora(self):
+    def posicion_computadora(self):#llena las la matris de los valores c(i,i)
         for i in range(3):
             for j in range(8):
                 if (i + j) % 2 == 1:
                     self.matriz[i][j] = ("c" + str(i) + str(j))
 
-    def posicion_jugador(self):
+    def posicion_jugador(self): #llena las la matris de los valores b(i,i)
         for i in range(5, 8, 1):
             for j in range(8):
                 if (i + j) % 2 == 1:
                     self.matriz[i][j] = ("b" + str(i) + str(j))
 
     def imprimir_matriz(self):
+        '''
+        imprime esto en cada vuelta
+0  |
+1  |
+2  |-
+3  |
+4  |
+5  |
+6  |
+7  |
+
+     0   1   2   3   4   5   6   7
+        '''
         i = 0
         print()
         for row_fila in self.matriz:
             '''Grafica la fial vertical 0  !, 1  ! con un salto de linea '''
-            print(i, end="  |")
+            print(i, end="  |") # imprime los numerso guia de la primera colimna
             i += 1
             for elem in row_fila:
-                '''toma los elemtos de la de (fila_row_fila, columna_elemt) '''
+                '''toma los elemtos de la de (fila_row_fila, columna_elemt)'''
                 print(elem, end=" ")
-            print()
+            print() # esto a un espacio en las lineas
         print()
         for j in range(8):
+            '''imprime los numeros de la ultima fila guia fila '''
             if j == 0:
                 j = "     0"
             print(j, end="   ")
-        print("\n")
+        print("\n") # salto de linea 
 
-    def get_player_input(self):
-        movimientos_disponibles = juego_damas.find_player_movimientos_disponibles(self.matriz, self.salto_obligatorio)
+    def obtener_entrada_jugador(self):
+
+        '''
+        recibe todos los datos que el jugador humano introduce desde la consola
+        akmacena y recibe  los  datos de la pieza a mover y  su destino 
+        '''
+
+        movimientos_disponibles = juego_damas.encontrar_movimientos_del_jugador_disponibles(self.matriz, self.salto_obligatorio)
+
         if len(movimientos_disponibles) == 0:
             if self.piezas_computadora > self.piezas_jugador:
                 print(
-                    ansi_red + "You have no moves left, and you have fewer pieces than the computer.YOU LOSE!" + ansi_reset)
-                exit()
+                    ansi_red + "No te quedan movimientos y tienes menos piezas que la computadora. ¡TÚ PIERDES! JAJAJA " + ansi_reset)
+                exit() # finaliza el programa
             else:
-                print(ansi_yellow + "You have no available moves.\nGAME ENDED!" + ansi_reset)
+                print(ansi_yellow + "No tienes movimientos disponibles.\nJUEGO TERMINADO!" + ansi_reset)
                 exit()
+
         self.piezas_jugador = 0
         self.piezas_computadora = 0
+        
         while True:
 
-            coord1 = input("Which piece[i,j]: ")
-            if coord1 == "":
-                print(ansi_cyan + "Game ended!" + ansi_reset)
+            coord_de_pieza_a_mover = input("cual pieza [i,j]: ")
+            if coord_de_pieza_a_mover == "":
+                print(ansi_cyan + "No me hagas perder mi timepo, ¡El juego a terminado!" + ansi_reset)
+                exit() # termina la ejecucin
+            elif coord_de_pieza_a_mover == "s":
+                print(ansi_cyan + "JAJAJA te rendiste, que? mucho miedo, vas ha llorar?\nCoward." + ansi_reset)
                 exit()
-            elif coord1 == "s":
-                print(ansi_cyan + "You surrendered.\nCoward." + ansi_reset)
+            destino_de_Pieza = input("A donde[i,j]:")
+            if destino_de_Pieza == "":
+                print(ansi_cyan + "El juego termino!" + ansi_reset)
                 exit()
-            coord2 = input("Where to[i,j]:")
-            if coord2 == "":
-                print(ansi_cyan + "Game ended!" + ansi_reset)
+            elif destino_de_Pieza == "s":
+                print(ansi_cyan + "YJAJAJA te Rendiste, que? mucho miedo, vas ha llorar?\nCoward." + ansi_reset)
                 exit()
-            elif coord2 == "s":
-                print(ansi_cyan + "You surrendered.\nCoward." + ansi_reset)
-                exit()
-            old = coord1.split(",")
-            new = coord2.split(",")
+            coordenada_antigua = coord_de_pieza_a_mover.split(",") # separa en Una lista a partir del parametro que se le pasa ","
+                                            # por ejemplo  "4,5 " ====> ["4"," 5"] 
+            coordenada_nueva = destino_de_Pieza.split(",")
 
-            if len(old) != 2 or len(new) != 2:
-                print(ansi_red + "Illegal input" + ansi_reset)
+            if len(coordenada_antigua) != 2 or len(coordenada_nueva) != 2:
+                print(ansi_red + "movimiento ilegal" + ansi_reset)
             else:
-                viejo_i = old[0]
-                viejo_j = old[1]
-                nuevo_i = new[0]
-                nuevo_j = new[1]
-                if not viejo_i.isdigit() or not viejo_j.isdigit() or not nuevo_i.isdigit() or not nuevo_j.isdigit():
+                viejo_i = coordenada_antigua[0]
+                viejo_j = coordenada_antigua[1]
+                nuevo_i = coordenada_nueva[0]
+                nuevo_j = coordenada_nueva[1]
+                if not viejo_i.isdigit() or not viejo_j.isdigit() or not nuevo_i.isdigit() or not nuevo_j.isdigit(): 
+                    # comprueba si los valores introducidos son  numeros de un solo digito .isdigit() 
                     print(ansi_red + "Illegal input" + ansi_reset)
                 else:
                     move = [int(viejo_i), int(viejo_j), int(nuevo_i), int(nuevo_j)]
                     if move not in movimientos_disponibles:
-                        print(ansi_red + "Illegal move!" + ansi_reset)
+                        print(ansi_red + "movimiento ilegal!" + ansi_reset)
                     else:
-                        juego_damas.make_a_move(self.matriz, int(viejo_i), int(viejo_j), int(nuevo_i), int(nuevo_j), "B", 0)
+                        juego_damas.hacer_un_movimiento(self.matriz, int(viejo_i), int(viejo_j), int(nuevo_i), int(nuevo_j), "B", 0)
                         for m in range(8):
                             for n in range(8):
                                 if self.matriz[m][n][0] == "c" or self.matriz[m][n][0] == "C":
@@ -165,47 +190,50 @@ class juego_damas:
 
     @staticmethod
     def encontrar_movimientos_disponibles(tablero, salto_obligatorio):
+        # Encuentra todos los movimientos disponibles para el turno que recibe, 
+        #tanto para la dama como para el peon, y devuelve una lista con los posibles movicoste_para_ctos o saltos(comer pieza)
         movimientos_disponibles = []
-        available_jumps = []
+        saltos_disponibles = []
         for m in range(8):
             for n in range(8):
-                if tablero[m][n][0] == "c":
-                    if juego_damas.check_moves(tablero, m, n, m + 1, n + 1):
+                if tablero[m][n][0] == "c": # si es pieza peon 
+                    if juego_damas.conprobar_movimientos(tablero, m, n, m + 1, n + 1):
                         movimientos_disponibles.append([m, n, m + 1, n + 1])
-                    if juego_damas.check_moves(tablero, m, n, m + 1, n - 1):
+                    if juego_damas.conprobar_movimientos(tablero, m, n, m + 1, n - 1):
                         movimientos_disponibles.append([m, n, m + 1, n - 1])
-                    if juego_damas.check_jumps(tablero, m, n, m + 1, n - 1, m + 2, n - 2):
-                        available_jumps.append([m, n, m + 2, n - 2])
-                    if juego_damas.check_jumps(tablero, m, n, m + 1, n + 1, m + 2, n + 2):
-                        available_jumps.append([m, n, m + 2, n + 2])
-                elif tablero[m][n][0] == "C":
-                    if juego_damas.check_moves(tablero, m, n, m + 1, n + 1):
+                    if juego_damas.comprobar_saltos(tablero, m, n, m + 1, n - 1, m + 2, n - 2):
+                        saltos_disponibles.append([m, n, m + 2, n - 2])
+                    if juego_damas.comprobar_saltos(tablero, m, n, m + 1, n + 1, m + 2, n + 2):
+                        saltos_disponibles.append([m, n, m + 2, n + 2])
+                elif tablero[m][n][0] == "C": # si es pieza REINA   
+                    if juego_damas.conprobar_movimientos(tablero, m, n, m + 1, n + 1):
                         movimientos_disponibles.append([m, n, m + 1, n + 1])
-                    if juego_damas.check_moves(tablero, m, n, m + 1, n - 1):
+                    if juego_damas.conprobar_movimientos(tablero, m, n, m + 1, n - 1):
                         movimientos_disponibles.append([m, n, m + 1, n - 1])
-                    if juego_damas.check_moves(tablero, m, n, m - 1, n - 1):
+                    if juego_damas.conprobar_movimientos(tablero, m, n, m - 1, n - 1):
                         movimientos_disponibles.append([m, n, m - 1, n - 1])
-                    if juego_damas.check_moves(tablero, m, n, m - 1, n + 1):
+                    if juego_damas.conprobar_movimientos(tablero, m, n, m - 1, n + 1):
                         movimientos_disponibles.append([m, n, m - 1, n + 1])
-                    if juego_damas.check_jumps(tablero, m, n, m + 1, n - 1, m + 2, n - 2):
-                        available_jumps.append([m, n, m + 2, n - 2])
-                    if juego_damas.check_jumps(tablero, m, n, m - 1, n - 1, m - 2, n - 2):
-                        available_jumps.append([m, n, m - 2, n - 2])
-                    if juego_damas.check_jumps(tablero, m, n, m - 1, n + 1, m - 2, n + 2):
-                        available_jumps.append([m, n, m - 2, n + 2])
-                    if juego_damas.check_jumps(tablero, m, n, m + 1, n + 1, m + 2, n + 2):
-                        available_jumps.append([m, n, m + 2, n + 2])
+                    if juego_damas.comprobar_saltos(tablero, m, n, m + 1, n - 1, m + 2, n - 2):
+                        saltos_disponibles.append([m, n, m + 2, n - 2])
+                    if juego_damas.comprobar_saltos(tablero, m, n, m - 1, n - 1, m - 2, n - 2):
+                        saltos_disponibles.append([m, n, m - 2, n - 2])
+                    if juego_damas.comprobar_saltos(tablero, m, n, m - 1, n + 1, m - 2, n + 2):
+                        saltos_disponibles.append([m, n, m - 2, n + 2])
+                    if juego_damas.comprobar_saltos(tablero, m, n, m + 1, n + 1, m + 2, n + 2):
+                        saltos_disponibles.append([m, n, m + 2, n + 2])
         if salto_obligatorio is False:
-            available_jumps.extend(movimientos_disponibles)
-            return available_jumps
+            saltos_disponibles.extend(movimientos_disponibles)
+            return saltos_disponibles
         elif salto_obligatorio is True:
-            if len(available_jumps) == 0:
+            if len(saltos_disponibles) == 0:
                 return movimientos_disponibles
             else:
-                return available_jumps
+                return saltos_disponibles
 
     @staticmethod
-    def check_jumps(tablero, viejo_i, viejo_j, via_i, via_j, nuevo_i, nuevo_j):
+    def comprobar_saltos(tablero, viejo_i, viejo_j, via_i, via_j, nuevo_i, nuevo_j):
+        # evalua la cccionde comerse una ficha y  si ese movimiento es valido
         if nuevo_i > 7 or nuevo_i < 0:
             return False
         if nuevo_j > 7 or nuevo_j < 0:
@@ -223,108 +251,115 @@ class juego_damas:
         return True
 
     @staticmethod
-    def check_moves(tablero, viejo_i, viejo_j, nuevo_i, nuevo_j):
+    def conprobar_movimientos(tablero, viejo_i, viejo_j, nuevo_i, nuevo_j):
+        # evalua la accion de avanzar en una casillla y  si ese movimiento ee valido
 
-        if nuevo_i > 7 or nuevo_i < 0:
+        if nuevo_i > 7 or nuevo_i < 0:  # si  el movimiento en la fila se sale del tablero retotna fado
             return False
-        if nuevo_j > 7 or nuevo_j < 0:
+        if nuevo_j > 7 or nuevo_j < 0: # si el mpvimiento e la columna se sale del tablero retorna falso 
             return False
-        if tablero[viejo_i][viejo_j] == "---":
+        if tablero[viejo_i][viejo_j] == "---": # si la posiscion que se eligio para mover estaba vacia entonces retorna falso
             return False
-        if tablero[nuevo_i][nuevo_j] != "---":
+        if tablero[nuevo_i][nuevo_j] != "---": # si la posicion a la que me quiero mover no es un espacio vacio retorna falso
             return False
-        if tablero[viejo_i][viejo_j][0] == "b" or tablero[viejo_i][viejo_j][0] == "B":
+        if tablero[viejo_i][viejo_j][0] == "b" or tablero[viejo_i][viejo_j][0] == "B":  
+            # si la posicion a tomar es la del jugaro esnces devuelve falso poruqe solo se podria saltar esa pieza pero ttomar su ponicion 
             return False
         if tablero[nuevo_i][nuevo_j] == "---":
+            # si la pocicion a la que se va ha mover esat vacia y es valida devuelve true
             return True
 
     @staticmethod
-    def calculate_heuristics(tablero):
-        result = 0
-        mine = 0
-        opp = 0
+    def calcular_heurísticas(tablero):
+
+        resultado = 0
+        coste_para_c = 0
+        arriba = 0
         for i in range(8):
             for j in range(8):
                 if tablero[i][j][0] == "c" or tablero[i][j][0] == "C":
-                    mine += 1
+                    coste_para_c += 1
 
-                    if tablero[i][j][0] == "c":
-                        result += 5
-                    if tablero[i][j][0] == "C":
-                        result += 10
+                    if tablero[i][j][0] == "c": 
+                        resultado += 5
+                    if tablero[i][j][0] == "C": 
+                        resultado += 10
                     if i == 0 or j == 0 or i == 7 or j == 7:
-                        result += 7
+                        resultado += 7
                     if i + 1 > 7 or j - 1 < 0 or i - 1 < 0 or j + 1 > 7:
                         continue
                     if (tablero[i + 1][j - 1][0] == "b" or tablero[i + 1][j - 1][0] == "B") and tablero[i - 1][
                         j + 1] == "---":
-                        result -= 3
+                        resultado -= 3
                     if (tablero[i + 1][j + 1][0] == "b" or tablero[i + 1][j + 1] == "B") and tablero[i - 1][j - 1] == "---":
-                        result -= 3
+                        resultado -= 3
                     if tablero[i - 1][j - 1][0] == "B" and tablero[i + 1][j + 1] == "---":
-                        result -= 3
+                        resultado -= 3
 
                     if tablero[i - 1][j + 1][0] == "B" and tablero[i + 1][j - 1] == "---":
-                        result -= 3
+                        resultado -= 3
                     if i + 2 > 7 or i - 2 < 0:
                         continue
                     if (tablero[i + 1][j - 1][0] == "B" or tablero[i + 1][j - 1][0] == "b") and tablero[i + 2][
                         j - 2] == "---":
-                        result += 6
+                        resultado += 6
                     if i + 2 > 7 or j + 2 > 7:
                         continue
                     if (tablero[i + 1][j + 1][0] == "B" or tablero[i + 1][j + 1][0] == "b") and tablero[i + 2][
                         j + 2] == "---":
-                        result += 6
+                        resultado += 6
 
                 elif tablero[i][j][0] == "b" or tablero[i][j][0] == "B":
-                    opp += 1
+                    arriba += 1
 
-        return result + (mine - opp) * 1000
+        return resultado + (coste_para_c - arriba) * 1000
 
     @staticmethod
-    def find_player_movimientos_disponibles(tablero, salto_obligatorio):
+    def encontrar_movimientos_del_jugador_disponibles(tablero, salto_obligatorio):#evalua el tablero EL TABLERO
+        #pero esta vez para ver si los movimmientos del jugador son corectos, y  devuelvee una lista con los 
+        #movimientos o saltos(comer pieza)
         movimientos_disponibles = []
-        available_jumps = []
+        saltos_disponibles = []
         for m in range(8):
             for n in range(8):
                 if tablero[m][n][0] == "b":
-                    if juego_damas.check_player_moves(tablero, m, n, m - 1, n - 1):
+                    if juego_damas.verificar_movimientos_del_jugador(tablero, m, n, m - 1, n - 1):
                         movimientos_disponibles.append([m, n, m - 1, n - 1])
-                    if juego_damas.check_player_moves(tablero, m, n, m - 1, n + 1):
+                    if juego_damas.verificar_movimientos_del_jugador(tablero, m, n, m - 1, n + 1):
                         movimientos_disponibles.append([m, n, m - 1, n + 1])
-                    if juego_damas.check_player_jumps(tablero, m, n, m - 1, n - 1, m - 2, n - 2):
-                        available_jumps.append([m, n, m - 2, n - 2])
-                    if juego_damas.check_player_jumps(tablero, m, n, m - 1, n + 1, m - 2, n + 2):
-                        available_jumps.append([m, n, m - 2, n + 2])
+                    if juego_damas.comprobar_saltos_Dejugador(tablero, m, n, m - 1, n - 1, m - 2, n - 2):
+                        saltos_disponibles.append([m, n, m - 2, n - 2])
+                    if juego_damas.comprobar_saltos_Dejugador(tablero, m, n, m - 1, n + 1, m - 2, n + 2):
+                        saltos_disponibles.append([m, n, m - 2, n + 2])
                 elif tablero[m][n][0] == "B":
-                    if juego_damas.check_player_moves(tablero, m, n, m - 1, n - 1):
+                    if juego_damas.verificar_movimientos_del_jugador(tablero, m, n, m - 1, n - 1):
                         movimientos_disponibles.append([m, n, m - 1, n - 1])
-                    if juego_damas.check_player_moves(tablero, m, n, m - 1, n + 1):
+                    if juego_damas.verificar_movimientos_del_jugador(tablero, m, n, m - 1, n + 1):
                         movimientos_disponibles.append([m, n, m - 1, n + 1])
-                    if juego_damas.check_player_jumps(tablero, m, n, m - 1, n - 1, m - 2, n - 2):
-                        available_jumps.append([m, n, m - 2, n - 2])
-                    if juego_damas.check_player_jumps(tablero, m, n, m - 1, n + 1, m - 2, n + 2):
-                        available_jumps.append([m, n, m - 2, n + 2])
-                    if juego_damas.check_player_moves(tablero, m, n, m + 1, n - 1):
+                    if juego_damas.comprobar_saltos_Dejugador(tablero, m, n, m - 1, n - 1, m - 2, n - 2):
+                        saltos_disponibles.append([m, n, m - 2, n - 2])
+                    if juego_damas.comprobar_saltos_Dejugador(tablero, m, n, m - 1, n + 1, m - 2, n + 2):
+                        saltos_disponibles.append([m, n, m - 2, n + 2])
+                    if juego_damas.verificar_movimientos_del_jugador(tablero, m, n, m + 1, n - 1):
                         movimientos_disponibles.append([m, n, m + 1, n - 1])
-                    if juego_damas.check_player_jumps(tablero, m, n, m + 1, n - 1, m + 2, n - 2):
-                        available_jumps.append([m, n, m + 2, n - 2])
-                    if juego_damas.check_player_moves(tablero, m, n, m + 1, n + 1):
+                    if juego_damas.comprobar_saltos_Dejugador(tablero, m, n, m + 1, n - 1, m + 2, n - 2):
+                        saltos_disponibles.append([m, n, m + 2, n - 2])
+                    if juego_damas.verificar_movimientos_del_jugador(tablero, m, n, m + 1, n + 1):
                         movimientos_disponibles.append([m, n, m + 1, n + 1])
-                    if juego_damas.check_player_jumps(tablero, m, n, m + 1, n + 1, m + 2, n + 2):
-                        available_jumps.append([m, n, m + 2, n + 2])
+                    if juego_damas.comprobar_saltos_Dejugador(tablero, m, n, m + 1, n + 1, m + 2, n + 2):
+                        saltos_disponibles.append([m, n, m + 2, n + 2])
         if salto_obligatorio is False:
-            available_jumps.extend(movimientos_disponibles)
-            return available_jumps
+            saltos_disponibles.extend(movimientos_disponibles)
+            return saltos_disponibles
         elif salto_obligatorio is True:
-            if len(available_jumps) == 0:
+            if len(saltos_disponibles) == 0:
                 return movimientos_disponibles
             else:
-                return available_jumps
+                return saltos_disponibles
 
     @staticmethod
-    def check_player_moves(tablero, viejo_i, viejo_j, nuevo_i, nuevo_j):
+    def verificar_movimientos_del_jugador(tablero, viejo_i, viejo_j, nuevo_i, nuevo_j):
+        '''verifica silos movimientos qie hace el jugador son validos solo es valido si se mueve aun espacio vacio correcto'''
         if nuevo_i > 7 or nuevo_i < 0:
             return False
         if nuevo_j > 7 or nuevo_j < 0:
@@ -339,7 +374,8 @@ class juego_damas:
             return True
 
     @staticmethod
-    def check_player_jumps(tablero, viejo_i, viejo_j, via_i, via_j, nuevo_i, nuevo_j):
+    def comprobar_saltos_Dejugador(tablero, viejo_i, viejo_j, via_i, via_j, nuevo_i, nuevo_j):
+        '''comprueba si las accion de comerte una pieza es correctamente ejecutada'''
         if nuevo_i > 7 or nuevo_i < 0:
             return False
         if nuevo_j > 7 or nuevo_j < 0:
@@ -356,7 +392,7 @@ class juego_damas:
             return False
         return True
 
-    def evaluate_estados(self):
+    def evaluar_estados(self):
         t1 = time.time()
         estado_actual = Node(deepcopy(self.matriz))
 
@@ -377,9 +413,9 @@ class juego_damas:
         if len(dict.keys()) == 0:
             print(ansi_green + "Computer has cornered itself.\nYOU WIN!" + ansi_reset)
             exit()
-        new_tablero = dict[max(dict)].get_tablero()
+        coordenada_nueva_tablero = dict[max(dict)].get_tablero()
         move = dict[max(dict)].move
-        self.matriz = new_tablero
+        self.matriz = coordenada_nueva_tablero
         t2 = time.time()
         diff = t2 - t1
         print("Computer has moved (" + str(move[0]) + "," + str(move[1]) + ") to (" + str(move[2]) + "," + str(
@@ -389,7 +425,7 @@ class juego_damas:
     @staticmethod
     def minimax(tablero, depth, alpha, beta, maximizing_player, salto_obligatorio):
         if depth == 0:
-            return juego_damas.calculate_heuristics(tablero)
+            return juego_damas.calcular_heurísticas(tablero)
         estado_actual = Node(deepcopy(tablero))
         if maximizing_player is True:
             max_eval = -math.inf
@@ -413,7 +449,7 @@ class juego_damas:
             return min_eval
 
     @staticmethod
-    def make_a_move(tablero, viejo_i, viejo_j, nuevo_i, nuevo_j, letra_grande, fila_reina):
+    def hacer_un_movimiento(tablero, viejo_i, viejo_j, nuevo_i, nuevo_j, letra_grande, fila_reina):
         letter = tablero[viejo_i][viejo_j][0]
         i_difference = viejo_i - nuevo_i
         j_difference = viejo_j - nuevo_j
@@ -461,7 +497,7 @@ class juego_damas:
             self.imprimir_matriz()
             if self.turno_jugador is True:
                 print(ansi_cyan + "\nPlayer's turn." + ansi_reset)
-                self.get_player_input()
+                self.obtener_entrada_jugador()
             else:
                 print(ansi_cyan + "Computer's turn." + ansi_reset)
                 print("Thinking...")
@@ -475,7 +511,7 @@ class juego_damas:
                 print(ansi_green + "Computer has no pieces left.\nYOU WIN!" + ansi_reset)
                 exit()
             elif self.piezas_computadora - self.piezas_jugador == 7:
-                wish = input("You have 7 pieces fewer than your opponent.Do you want to surrender?")
+                wish = input("You have 7 pieces fewer than your arribaonent.Do you want to surrender?")
                 if wish == "" or wish == "yes":
                     print(ansi_cyan + "Coward." + ansi_reset)
                     exit()
