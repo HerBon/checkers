@@ -191,7 +191,7 @@ class juego_damas:
     @staticmethod
     def encontrar_movimientos_disponibles(tablero, salto_obligatorio):
         # Encuentra todos los movimientos disponibles para el turno que recibe, 
-        #tanto para la dama como para el peon, y devuelve una lista con los posibles movicoste_para_ctos o saltos(comer pieza)
+        #tanto para la dama como para el peon, y devuelve una lista con los posibles movicoste_p4ra_ctos o saltos(comer pieza)
         movimientos_disponibles = []
         saltos_disponibles = []
         for m in range(8):
@@ -271,14 +271,14 @@ class juego_damas:
 
     @staticmethod
     def calcular_heurísticas(tablero):
-
+        ''' Evalua todas las situciones favorables para el computador ,  la catidas de piezas y retorna '''
         resultado = 0
-        coste_para_c = 0
-        arriba = 0
+        contador_c_piezas = 0
+        contador_b_piezas = 0
         for i in range(8):
             for j in range(8):
                 if tablero[i][j][0] == "c" or tablero[i][j][0] == "C":
-                    coste_para_c += 1
+                    contador_c_piezas += 1
 
                     if tablero[i][j][0] == "c": 
                         resultado += 5
@@ -287,32 +287,40 @@ class juego_damas:
                     if i == 0 or j == 0 or i == 7 or j == 7:
                         resultado += 7
                     if i + 1 > 7 or j - 1 < 0 or i - 1 < 0 or j + 1 > 7:
+                        '''si hacer esta operacion me saca de los lmites de la matriz, saltar a la siguiente iteracion '''
                         continue
-                    if (tablero[i + 1][j - 1][0] == "b" or tablero[i + 1][j - 1][0] == "B") and tablero[i - 1][
-                        j + 1] == "---":
+                    if (tablero[i + 1][j - 1][0] == "b" or tablero[i + 1][j - 1][0] == "B") and tablero[i - 1][j + 1] == "---":
+                        ''' si (c) a la izquierda en diagonal allas a "b" o "B" y atras a la derecha no tienes a nadie te pueden 
+                        comer asi que te resto 3  '''
                         resultado -= 3
                     if (tablero[i + 1][j + 1][0] == "b" or tablero[i + 1][j + 1] == "B") and tablero[i - 1][j - 1] == "---":
+                        '''si (c) a la derecha en diagonal alla a "b" O"B"  Y Atraz a la izquierda no 
+                        tieens a nadie te pueden comer asi que pierdes 3'''
                         resultado -= 3
                     if tablero[i - 1][j - 1][0] == "B" and tablero[i + 1][j + 1] == "---":
+                        #si te pueden comer desde la dercha con una reina pierdes 3pts
                         resultado -= 3
 
                     if tablero[i - 1][j + 1][0] == "B" and tablero[i + 1][j - 1] == "---":
+                        #si te pueden comer desde la izquierda con una reina pierdes 3 pts 
                         resultado -= 3
                     if i + 2 > 7 or i - 2 < 0:
+                        #si al avanzas  2 cuadros  hacia la  izquierda y te sales del tablero, saltate ala siguiene iteracion
                         continue
-                    if (tablero[i + 1][j - 1][0] == "B" or tablero[i + 1][j - 1][0] == "b") and tablero[i + 2][
-                        j - 2] == "---":
+                    if (tablero[i + 1][j - 1][0] == "B" or tablero[i + 1][j - 1][0] == "b") and tablero[i + 2][j - 2] == "---":
+                        #si a la izquierda delante  tienes una "b o B"  y atraz de ellas no hay nada sumate 6 
                         resultado += 6
                     if i + 2 > 7 or j + 2 > 7:
+                        #si al avanzas  2 cuadros  hacia la  derecha y te sales del tablero, saltate ala siguiene iteracion
                         continue
-                    if (tablero[i + 1][j + 1][0] == "B" or tablero[i + 1][j + 1][0] == "b") and tablero[i + 2][
-                        j + 2] == "---":
+                    if (tablero[i + 1][j + 1][0] == "B" or tablero[i + 1][j + 1][0] == "b") and tablero[i + 2][j + 2] == "---":
+                        #si a la derecha delante  tienes una "b o B"  y atraz de ellas no hay nada sumate 6
                         resultado += 6
 
                 elif tablero[i][j][0] == "b" or tablero[i][j][0] == "B":
-                    arriba += 1
+                    contador_b_piezas += 1
 
-        return resultado + (coste_para_c - arriba) * 1000
+        return resultado + (contador_c_piezas - contador_b_piezas) * 1000
 
     @staticmethod
     def encontrar_movimientos_del_jugador_disponibles(tablero, salto_obligatorio):#evalua el tablero EL TABLERO
@@ -511,7 +519,7 @@ class juego_damas:
                 print(ansi_green + "Computer has no pieces left.\nYOU WIN!" + ansi_reset)
                 exit()
             elif self.piezas_computadora - self.piezas_jugador == 7:
-                wish = input("You have 7 pieces fewer than your arribaonent.Do you want to surrender?")
+                wish = input("You have 7 pieces fewer than your contador_b_piezasonent.Do you want to surrender?")
                 if wish == "" or wish == "yes":
                     print(ansi_cyan + "Coward." + ansi_reset)
                     exit()
