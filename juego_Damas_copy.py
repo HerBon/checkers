@@ -151,14 +151,14 @@ class juego_damas:
                 print(ansi_cyan + "No me hagas perder mi timepo, ¡El juego a terminado!" + ansi_reset)
                 exit() # termina la ejecucin
             elif coord_de_pieza_a_mover == "s":
-                print(ansi_cyan + "JAJAJA te rendiste, que? mucho miedo, vas ha llorar?\nCoward." + ansi_reset)
+                print(ansi_cyan + "JAJAJA te rendiste\nCoward." + ansi_reset)
                 exit()
             destino_de_Pieza = input("A donde[i,j]:")
             if destino_de_Pieza == "":
                 print(ansi_cyan + "El juego termino!" + ansi_reset)
                 exit()
             elif destino_de_Pieza == "s":
-                print(ansi_cyan + "YJAJAJA te Rendiste, que? mucho miedo, vas ha llorar?\nCoward." + ansi_reset)
+                print(ansi_cyan + "YJAJAJA te Rendiste\nCoward." + ansi_reset)
                 exit()
             coordenada_antigua = coord_de_pieza_a_mover.split(",") # separa en Una lista a partir del parametro que se le pasa ","
                                             # por ejemplo  "4,5 " ====> ["4"," 5"] 
