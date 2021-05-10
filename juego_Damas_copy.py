@@ -158,7 +158,7 @@ class juego_damas:
                 print(ansi_cyan + "El juego termino!" + ansi_reset)
                 exit()
             elif destino_de_Pieza == "s":
-                print(ansi_cyan + "YJAJAJA te Rendiste\nCoward." + ansi_reset)
+                print(ansi_cyan + "JAJAJA te Rendiste\nCoward." + ansi_reset)
                 exit()
             coordenada_antigua = coord_de_pieza_a_mover.split(",") # separa en Una lista a partir del parametro que se le pasa ","
                                             # por ejemplo  "4,5 " ====> ["4"," 5"] 
