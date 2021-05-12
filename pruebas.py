@@ -12,3 +12,24 @@ print()
 print()
 print("---------")
 print()
+'''
+lista = [1,3,1,1,4]
+animal = sorted(lista)
+print(lista[:])
+print(animal)
+'''
+
+'''
+clase ratas_lab
+    init():
+        self.proba_de_vivir
+
+    la_muerte(self):
+
+'''
+a = ("John", "Charles", "Mike")
+b = ("Jenny", "Christy", "Monica")
+
+x = zip(a, b)
+
+print(list(x))
